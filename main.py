@@ -89,6 +89,53 @@ def get_image_latitude_y_pixel_with_list(latitude_list, decimal_latitude):
             return pair[0]
 
 
+def get_image_longitude_x_pixel_with_list(longitude_list, decimal_longitude):
+    if decimal_longitude >= longitude_list[0][1]:
+        return longitude_list[0][0]
+    if decimal_longitude <= longitude_list[-1][1]:
+        return longitude_list[-1][0]
+    for pair in longitude_list:
+        if pair[1] > decimal_longitude:
+            prev_pair = pair
+        elif pair[1] < decimal_longitude:
+            lower_long_bound = prev_pair[0]
+            upper_long_bound = pair[0]
+            delta = (decimal_longitude - pair[1]) / 5.0
+            pixel_delta = (lower_long_bound - upper_long_bound)
+            ret_val = int(upper_long_bound + (pixel_delta * delta))
+            # Bound to map
+            if ret_val < longitude_list[-1][0]:
+                return longitude_list[-1][0]
+            elif ret_val > longitude_list[0][0]:
+                return longitude_list[0][0]
+            return ret_val
+        else:
+            return pair[0]
+
+
+# Maps the X coordinate on the image to an associated longitude
+atl_longitude_points = []
+atl_longitude_points.append((899, -10))  # Eastern limit
+atl_longitude_points.append((852, -15))
+atl_longitude_points.append((805, -20))
+atl_longitude_points.append((757, -25))
+atl_longitude_points.append((710, -30))
+atl_longitude_points.append((662, -35))
+atl_longitude_points.append((615, -40))
+atl_longitude_points.append((568, -45))
+atl_longitude_points.append((520, -50))
+atl_longitude_points.append((473, -55))
+atl_longitude_points.append((426, -60))
+atl_longitude_points.append((378, -65))
+atl_longitude_points.append((331, -70))
+atl_longitude_points.append((284, -75))
+atl_longitude_points.append((236, -80))
+atl_longitude_points.append((189, -85))
+atl_longitude_points.append((141, -90))
+atl_longitude_points.append((94, -95))
+atl_longitude_points.append((47, -100))
+atl_longitude_points.append((0, -105))  # Western limit
+
 # Maps the Y coordinate on the image to an associated latitude
 atl_latitude_points = []
 atl_latitude_points.append((595, 0))  # lower limit
@@ -108,23 +155,8 @@ def get_atl_image_latitude_y_pixel(decimal_latitude):
     return get_image_latitude_y_pixel_with_list(atl_latitude_points, decimal_latitude)
 
 
-# TODO: use the same list functionality that the latitude uses
 def get_atl_image_longitude_x_pixel(decimal_longitude):
-    # for ATL basin image 47 pixels = 5 degrees longitude roughly
-    ret_val = int(abs(((-105 - decimal_longitude) / 5) * 47))
-    if -85 <= decimal_longitude < -75:
-        ret_val += 1
-    elif -75 <= decimal_longitude < -60:
-        ret_val += 2
-    elif -60 <= decimal_longitude <= -50:
-        ret_val += 3
-    elif -50 < decimal_longitude < -30:
-        ret_val += 4
-    elif -30 <= decimal_longitude < -20:
-        ret_val += 5
-    elif -20 <= decimal_longitude < 0:
-        ret_val += 6
-    return ret_val
+    return get_image_longitude_x_pixel_with_list(atl_longitude_points, decimal_longitude)
 
 
 def do_mod_atl_image():
@@ -150,16 +182,35 @@ def do_mod_atl_image():
                 # print("latitude ", split[1], " gave y_coord: ", y_coord)
                 image.putpixel((x_coord, y_coord), (0, 0, 0, 255))
         # testing coordinate generation
-        # for longitude in range(-105, -5, 5):
+        # for longitude in range(0, 45):
+        #     longitude = -105 + (longitude * 2.5)
         #     x_coord = bound_x_to_image(width, get_atl_image_longitude_x_pixel(longitude))
-        #     # print("longitude: ", longitude, " x_coord: ", x_coord)
+        #     print("longitude: ", longitude, " x_coord: ", x_coord)
         #     for latitude in range(0, 25):
         #         latitude = latitude * 2.5
         #         y_coord = get_atl_image_latitude_y_pixel(latitude)
-        #         print("latitude ", latitude, " gave y_coord: ", y_coord)
+        #         # print("latitude ", latitude, " gave y_coord: ", y_coord)
         #         image.putpixel((x_coord, y_coord), (0, 0, 0, 255))
         image.save('atl_latest.png')
 
+
+# Maps the X coordinate on the image to an associated longitude
+east_pac_longitude_points = []
+east_pac_longitude_points.append((899, -75))  # Eastern limit
+east_pac_longitude_points.append((835, -80))
+east_pac_longitude_points.append((771, -85))
+east_pac_longitude_points.append((706, -90))
+east_pac_longitude_points.append((642, -95))
+east_pac_longitude_points.append((578, -100))
+east_pac_longitude_points.append((514, -105))
+east_pac_longitude_points.append((449, -110))
+east_pac_longitude_points.append((385, -115))
+east_pac_longitude_points.append((321, -120))
+east_pac_longitude_points.append((256, -125))
+east_pac_longitude_points.append((192, -130))
+east_pac_longitude_points.append((128, -135))
+east_pac_longitude_points.append((64, -140))
+east_pac_longitude_points.append((0, -145))  # Western limit
 
 # Maps the Y coordinate on the image to an associated latitude
 east_pac_latitude_points = []
@@ -178,20 +229,8 @@ def get_east_pac_image_latitude_y_pixel(decimal_latitude):
     return get_image_latitude_y_pixel_with_list(east_pac_latitude_points, decimal_latitude)
 
 
-# TODO: use the same list functionality that the latitude uses
 def get_east_pac_image_longitude_x_pixel(decimal_longitude):
-    # for EPAC image 64 pixels = 5 degrees longitude, and doesn't change too much to be significant for this purpose
-    # handle the sign change
-    ret_val = 0
-    if -145 <= decimal_longitude < -120:
-        ret_val = int(abs(((-145 - decimal_longitude) / 5) * 64))
-    elif -120 <= decimal_longitude <= -110:
-        ret_val = int(abs(((-145 - decimal_longitude) / 5) * 64)) + 1
-    elif -110 < decimal_longitude < -85:
-        ret_val = int(abs(((-145 - decimal_longitude) / 5) * 64)) + 2
-    else:
-        ret_val = int(abs(((-145 - decimal_longitude) / 5) * 64)) + 3
-    return ret_val
+    return get_image_longitude_x_pixel_with_list(east_pac_longitude_points, decimal_longitude)
 
 
 def do_mod_east_pac_image():
@@ -217,15 +256,41 @@ def do_mod_east_pac_image():
                 # print("latitude ", split[1], " gave y_coord: ", y_coord)
                 image.putpixel((x_coord, y_coord), (0, 0, 0, 255))
         # testing coordinate generation
-        # for longitude in range(-145, -70, 5):
-        #     x_coord = bound_x_to_image(width, get_epac_image_longitude_x_pixel(longitude))
-        #     # print("longitude: ", longitude, " x_coord: ", x_coord)
+        # for longitude in range(0, 45):
+        #     longitude = -145 + (longitude * 2.5)
+        #
+        #     x_coord = bound_x_to_image(width, get_east_pac_image_longitude_x_pixel(longitude))
+        #     print("longitude: ", longitude, " x_coord: ", x_coord)
         #     for latitude in range(0, 20):
         #         latitude = latitude * 2.5
-        #         y_coord = get_epac_image_latitude_y_pixel(latitude)
-        #         print("latitude ", latitude, " gave y_coord: ", y_coord)
+        #         y_coord = get_east_pac_image_latitude_y_pixel(latitude)
+        #         # print("latitude ", latitude, " gave y_coord: ", y_coord)
         #         image.putpixel((x_coord, y_coord), (0, 0, 0, 255))
         image.save('epac_latest.png')
+
+
+# Maps the X coordinate on the image to an associated longitude
+# From -180 to -120
+cpac_longitude_points_negative = []
+cpac_longitude_points_negative.append((899, -120))  # Eastern limit
+cpac_longitude_points_negative.append((839, -125))
+cpac_longitude_points_negative.append((774, -130))
+cpac_longitude_points_negative.append((709, -135))
+cpac_longitude_points_negative.append((644, -140))
+cpac_longitude_points_negative.append((579, -145))
+cpac_longitude_points_negative.append((514, -150))
+cpac_longitude_points_negative.append((449, -155))
+cpac_longitude_points_negative.append((384, -160))
+cpac_longitude_points_negative.append((319, -165))
+cpac_longitude_points_negative.append((255, -170))
+cpac_longitude_points_negative.append((190, -175))
+cpac_longitude_points_negative.append((125, -180))  # Western limit
+
+# From +170 to +180
+cpac_longitude_points_positive = []
+cpac_longitude_points_positive.append((125, 180))  # Eastern limit
+cpac_longitude_points_positive.append((60, 175))
+cpac_longitude_points_positive.append((0, 170))  # Western limit
 
 
 # Maps the Y coordinate on the image to an associated latitude
@@ -245,21 +310,11 @@ def get_cpac_image_latitude_y_pixel(decimal_latitude):
     return get_image_latitude_y_pixel_with_list(cpac_latitude_points, decimal_latitude)
 
 
-# TODO: use the same list functionality that the latitude uses
 def get_cpac_image_longitude_x_pixel(decimal_longitude):
-    # for CPAC image 65 pixels = 5 degrees longitude, and doesn't change too much to be significant for this purpose
-    # with an offset of 5 pixels
-    # handle the sign change
-    ret_val = 0
-    if -180 <= decimal_longitude < -165:
-        ret_val = int(abs(((-190 - decimal_longitude) / 5) * 65)) - 5
-    elif -165 <= decimal_longitude < 0:
-        # At -165 there's an extra offset
-        ret_val = int(abs(((-190 - decimal_longitude) / 5) * 65)) - 6
-    # sign flip
-    elif decimal_longitude <= 180:
-        ret_val = int(abs(((170 - decimal_longitude) / 5) * 65)) - 5
-    return ret_val
+    if decimal_longitude < 0:
+        return get_image_longitude_x_pixel_with_list(cpac_longitude_points_negative, decimal_longitude)
+    else:
+        return get_image_longitude_x_pixel_with_list(cpac_longitude_points_positive, decimal_longitude)
 
 
 def do_mod_cpac_image():
@@ -285,21 +340,23 @@ def do_mod_cpac_image():
                 # print("latitude ", split[1], " gave y_coord: ", y_coord)
                 image.putpixel((x_coord, y_coord), (0, 0, 0, 255))
         # testing coordinate generation
-        # for longitude in range(-180, -120, 5):
+        # for longitude in range(0, 45):
+        #    longitude = -180 + (longitude * 2.5)
         #    x_coord = bound_x_to_image(width, get_cpac_image_longitude_x_pixel(longitude))
         #    print("longitude: ", longitude, " x_coord: ", x_coord)
         #    for latitude in range(0, 20):
         #        latitude = latitude * 2.5
         #        y_coord = get_cpac_image_latitude_y_pixel(latitude)
-        #        print("latitude ", latitude, " gave y_coord: ", y_coord)
+        #        # print("latitude ", latitude, " gave y_coord: ", y_coord)
         #        image.putpixel((x_coord, y_coord), (0, 0, 0, 255))
-        # for longitude in range(170, 180, 5):
-        #    x_coord = bound_x_to_image(width, get_cpac_image_longitude_x_pixel(longitude))
-        #    print("longitude: ", longitude, " x_coord: ", x_coord)
-        #    for latitude in range(0, 20):
+        # for longitude in range(0, 4):
+        #     longitude = 170 + (longitude * 2.5)
+        #     x_coord = bound_x_to_image(width, get_cpac_image_longitude_x_pixel(longitude))
+        #     print("longitude: ", longitude, " x_coord: ", x_coord)
+        #     for latitude in range(0, 20):
         #        latitude = latitude * 2.5
         #        y_coord = get_cpac_image_latitude_y_pixel(latitude)
-        #        print("latitude ", latitude, " gave y_coord: ", y_coord)
+        #        # print("latitude ", latitude, " gave y_coord: ", y_coord)
         #        image.putpixel((x_coord, y_coord), (0, 0, 0, 255))
         image.save('cpac_latest.png')
 
