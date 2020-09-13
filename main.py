@@ -17,7 +17,10 @@ from urllib.parse import urlparse
 from PIL import Image, ImageFont, ImageDraw
 import xml.etree.ElementTree as ET
 from lxml import html
+import datetime
+import pytz
 
+UNOFFICIAL_STRING = '!!UNOFFICIAL IMAGE!!'
 nhcBaseURL = 'https://www.nhc.noaa.gov'
 addDisclaimerText = True
 cleanUpFiles = True
@@ -160,15 +163,22 @@ def get_atl_image_longitude_x_pixel(decimal_longitude):
 
 
 def do_mod_atl_image():
+    eastern = pytz.timezone('US/Eastern')
+    now_time_loc = datetime.datetime.now(eastern)
+    time_string = now_time_loc.strftime("!! %I:%M %p %Z !!")
+    date_string = now_time_loc.strftime("!! %a %b %d %Y !!")
     with Image.open('two_atl_5d0.png').convert('RGB') as image:
         if addDisclaimerText:
             font = ImageFont.truetype('Pillow/Tests/fonts/FreeMono.ttf', 15)
             draw = ImageDraw.Draw(image)
-            draw.text((700, 100), "!!UNOFFICIAL IMAGE!!", (255, 255, 255), font=font)
-            draw.text((700, 540), "!!UNOFFICIAL IMAGE!!", (255, 255, 255), font=font)
-            draw.text((15, 500), "!!UNOFFICIAL IMAGE!!", (255, 255, 255), font=font)
-            draw.text((80, 40), "!!UNOFFICIAL IMAGE!!", (0, 0, 0), font=font)
-            draw.text((660, 40), "!!UNOFFICIAL IMAGE!!", (0, 0, 0), font=font)
+            draw.text((700, 100), UNOFFICIAL_STRING, (255, 255, 255), font=font)
+            draw.text((700, 540), UNOFFICIAL_STRING, (255, 255, 255), font=font)
+            draw.text((15, 500), UNOFFICIAL_STRING, (255, 255, 255), font=font)
+            draw.text((80, 40), UNOFFICIAL_STRING, (0, 0, 0), font=font)
+            draw.text((660, 40), UNOFFICIAL_STRING, (0, 0, 0), font=font)
+        # Add time and date the image was generated
+        draw.text((700, 115), time_string, (255, 255, 255), font=font)
+        draw.text((700, 130), date_string, (255, 255, 255), font=font)
         width, height = image.size
         for file in glob.glob("*.kml"):
             print("Handling file: ", file)
@@ -234,16 +244,23 @@ def get_east_pac_image_longitude_x_pixel(decimal_longitude):
 
 
 def do_mod_east_pac_image():
+    pacific = pytz.timezone('US/Pacific')
+    now_time_loc = datetime.datetime.now(pacific)
+    time_string = now_time_loc.strftime("!! %I:%M %p %Z !!")
+    date_string = now_time_loc.strftime("!! %a %b %d %Y !!")
     with Image.open('two_pac_5d0.png').convert('RGB') as image:
         width, height = image.size
         if addDisclaimerText:
             font = ImageFont.truetype('Pillow/Tests/fonts/FreeMono.ttf', 15)
             draw = ImageDraw.Draw(image)
-            draw.text((60, 40), "!!UNOFFICIAL IMAGE!!", (0, 0, 0), font=font)
-            draw.text((15, 500), "!!UNOFFICIAL IMAGE!!", (255, 255, 255), font=font)
-            draw.text((15, 100), "!!UNOFFICIAL IMAGE!!", (255, 255, 255), font=font)
-            draw.text((700, 540), "!!UNOFFICIAL IMAGE!!", (255, 255, 255), font=font)
-            draw.text((660, 40), "!!UNOFFICIAL IMAGE!!", (0, 0, 0), font=font)
+            draw.text((60, 40), UNOFFICIAL_STRING, (0, 0, 0), font=font)
+            draw.text((15, 500), UNOFFICIAL_STRING, (255, 255, 255), font=font)
+            draw.text((15, 100), UNOFFICIAL_STRING, (255, 255, 255), font=font)
+            draw.text((700, 540), UNOFFICIAL_STRING, (255, 255, 255), font=font)
+            draw.text((660, 40), UNOFFICIAL_STRING, (0, 0, 0), font=font)
+        # Add time and date the image was generated
+        draw.text((15, 130), time_string, (255, 255, 255), font=font)
+        draw.text((15, 145), date_string, (255, 255, 255), font=font)
         for file in glob.glob("*.kml"):
             print("Handling file: ", file)
             tree = ET.parse(file)
@@ -318,16 +335,23 @@ def get_cpac_image_longitude_x_pixel(decimal_longitude):
 
 
 def do_mod_cpac_image():
+    hawaii = pytz.timezone('US/Hawaii')
+    now_time_loc = datetime.datetime.now(hawaii)
+    time_string = now_time_loc.strftime("!! %I:%M %p %Z !!")
+    date_string = now_time_loc.strftime("!! %a %b %d %Y !!")
     with Image.open('two_cpac_5d0.png').convert('RGB') as image:
         width, height = image.size
         if addDisclaimerText:
             font = ImageFont.truetype('Pillow/Tests/fonts/FreeMono.ttf', 15)
             draw = ImageDraw.Draw(image)
-            draw.text((60, 40), "!!UNOFFICIAL IMAGE!!", (0, 0, 0), font=font)
-            draw.text((15, 500), "!!UNOFFICIAL IMAGE!!", (255, 255, 255), font=font)
-            draw.text((700, 150), "!!UNOFFICIAL IMAGE!!", (255, 255, 255), font=font)
-            draw.text((700, 540), "!!UNOFFICIAL IMAGE!!", (255, 255, 255), font=font)
-            draw.text((660, 40), "!!UNOFFICIAL IMAGE!!", (0, 0, 0), font=font)
+            draw.text((60, 40), UNOFFICIAL_STRING, (0, 0, 0), font=font)
+            draw.text((15, 500), UNOFFICIAL_STRING, (255, 255, 255), font=font)
+            draw.text((700, 150), UNOFFICIAL_STRING, (255, 255, 255), font=font)
+            draw.text((700, 540), UNOFFICIAL_STRING, (255, 255, 255), font=font)
+            draw.text((660, 40), UNOFFICIAL_STRING, (0, 0, 0), font=font)
+        # Add time and date the image was generated
+        draw.text((700, 165), time_string, (255, 255, 255), font=font)
+        draw.text((700, 180), date_string, (255, 255, 255), font=font)
         for file in glob.glob("*.kml"):
             print("Handling file: ", file)
             tree = ET.parse(file)
