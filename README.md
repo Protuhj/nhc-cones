@@ -30,6 +30,27 @@ chardet==3.0.4
 idna==2.10
 lxml==4.5.2
 Pillow==7.2.0
+pytz==2020.1
 requests==2.24.0
 urllib3==1.25.10
 ```
+
+#### Running it  
+
+- Set up a Python virtual environment :   
+
+`python3.6 -m venv env`  
+
+- Activate the virtual environment:  
+
+`source ./env/bin/activate`  
+
+- Install requirements:  
+
+`pip3.6 install -r requirements.txt`  
+
+- Run it:  
+
+python3.6 main.py
+
+
