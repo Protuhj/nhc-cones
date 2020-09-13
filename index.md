@@ -1,5 +1,3 @@
-# NHC Cones
-
 ### Atlantic Basin
 ![Atlantic Basin Image](atl_latest.png)
 
