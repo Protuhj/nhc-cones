@@ -21,7 +21,7 @@ import datetime
 import pytz
 
 UNOFFICIAL_STRING = '!!UNOFFICIAL IMAGE!!'
-nhcBaseURL = 'https://www.nhc.noaa.gov'
+NHC_BASE_URL = 'https://www.nhc.noaa.gov'
 DRAW_FONT = ImageFont.truetype('Pillow/Tests/fonts/FreeMono.ttf', 15)
 DRAW_WHITE = ImageColor.getrgb('white')
 DRAW_BLACK = ImageColor.getrgb('black')
@@ -30,6 +30,39 @@ cleanUpFiles = True
 generateAtlantic = True
 generateCentralPacific = True
 generateEasternPacific = True
+drawEPacOnCPac = True
+# Controls whether or not pixels are drawn that are outside of the viewport
+# When drawing EPac on CPac, this will happen a lot
+drawOnExtents = False
+
+
+# Gets the namespace from an element
+def get_namespace(element):
+    m = re.match(r'{.*}', element.tag)
+    return m.group(0) if m else ''
+
+
+def extract_coords_from_kml(file):
+    print("Reading file: ", file)
+    tree = ET.parse(file)
+    root = tree.getroot()
+    namespace = get_namespace(root)
+    # print("namespace is: ", namespace)
+    coords = []
+    for node in root.findall(".//{0}LinearRing/{0}coordinates".format(namespace)):
+        coord_text_split = node.text.strip().split()
+        for coord_text in coord_text_split:
+            coords.append(coord_text)
+    # For processing TRACK data
+    # for node in root.findall(".//{0}LineString/{0}coordinates".format(namespace)):
+    #     coord_text_split = node.text.strip().split()
+    #     for coord_text in coord_text_split:
+    #         coords.append(coord_text)
+    if not coords:
+        # Fall back to brute-force
+        print("WARNING: Failed to get coords from ", file)
+        coords = root[0][3][1][0][0][0].text.strip().split()
+    return coords
 
 
 # Atlantic which_td = 2
@@ -45,7 +78,7 @@ def scrape_page(which_td):
         if re.match(r'.*/\w+_CONE_latest.kmz', link.attrib['href']):
             kmz_files.append(link.attrib['href'])
     for file_match in kmz_files:
-        full_url = "{}{}".format(nhcBaseURL, file_match.strip())
+        full_url = "{}{}".format(NHC_BASE_URL, file_match.strip())
         url = urlparse(full_url)
         print("file: ", full_url)
         file_name = path.basename(url.path)
@@ -64,18 +97,51 @@ def get_latest_base_image(image_url):
 
 
 def bound_x_to_image(image_width, x_coord):
+    if x_coord is None:
+        return None
     if x_coord < 0:
-        return 0
+        if drawOnExtents:
+            return 0
+        else:
+            return None
     elif x_coord > (image_width - 1):
-        return image_width - 1
+        if drawOnExtents:
+            return image_width - 1
+        else:
+            return None
     return x_coord
+
+
+def get_pixel_coord(coord_list, cur_delta, lower_bound, upper_bound):
+    pixel_delta = (lower_bound - upper_bound)
+    ret_val = int(upper_bound + (pixel_delta * cur_delta))
+    # Bound to map
+    if ret_val < coord_list[-1][0]:
+        if drawOnExtents:
+            return coord_list[-1][0]
+        else:
+            return None
+    elif ret_val > coord_list[0][0]:
+        if drawOnExtents:
+            return coord_list[0][0]
+        else:
+            return None
+    return ret_val
 
 
 def get_image_latitude_y_pixel_with_list(latitude_list, decimal_latitude):
     if decimal_latitude <= latitude_list[0][1]:
-        return latitude_list[0][0]
+        if drawOnExtents:
+            return latitude_list[0][0]
+        else:
+            return None
     if decimal_latitude >= latitude_list[-1][1]:
-        return latitude_list[-1][0]
+        if drawOnExtents:
+            return latitude_list[-1][0]
+        else:
+            return None
+
+    prev_pair = latitude_list[0]
     for pair in latitude_list:
         if pair[1] < decimal_latitude:
             prev_pair = pair
@@ -83,23 +149,23 @@ def get_image_latitude_y_pixel_with_list(latitude_list, decimal_latitude):
             lower_lat_bound = prev_pair[0]
             upper_lat_bound = pair[0]
             delta = (pair[1] - decimal_latitude) / 5.0
-            pixel_delta = (lower_lat_bound - upper_lat_bound)
-            ret_val = int(upper_lat_bound + (pixel_delta * delta))
-            # Bound to map
-            if ret_val < latitude_list[-1][0]:
-                return latitude_list[-1][0]
-            elif ret_val > latitude_list[0][0]:
-                return latitude_list[0][0]
-            return ret_val
+            return get_pixel_coord(latitude_list, delta, lower_lat_bound, upper_lat_bound)
         else:
             return pair[0]
 
 
 def get_image_longitude_x_pixel_with_list(longitude_list, decimal_longitude):
     if decimal_longitude >= longitude_list[0][1]:
-        return longitude_list[0][0]
+        if drawOnExtents:
+            return longitude_list[0][0]
+        else:
+            return None
     if decimal_longitude <= longitude_list[-1][1]:
-        return longitude_list[-1][0]
+        if drawOnExtents:
+            return longitude_list[-1][0]
+        else:
+            return None
+    prev_pair = longitude_list[0]
     for pair in longitude_list:
         if pair[1] > decimal_longitude:
             prev_pair = pair
@@ -107,14 +173,7 @@ def get_image_longitude_x_pixel_with_list(longitude_list, decimal_longitude):
             lower_long_bound = prev_pair[0]
             upper_long_bound = pair[0]
             delta = (decimal_longitude - pair[1]) / 5.0
-            pixel_delta = (lower_long_bound - upper_long_bound)
-            ret_val = int(upper_long_bound + (pixel_delta * delta))
-            # Bound to map
-            if ret_val < longitude_list[-1][0]:
-                return longitude_list[-1][0]
-            elif ret_val > longitude_list[0][0]:
-                return longitude_list[0][0]
-            return ret_val
+            return get_pixel_coord(longitude_list, delta, lower_long_bound, upper_long_bound)
         else:
             return pair[0]
 
@@ -126,6 +185,23 @@ def remove_logos_and_add_unofficial_text(image_draw, text_position_data):
     if addDisclaimerText:
         for loc in text_position_data:
             image_draw.text((loc[0], loc[1]), UNOFFICIAL_STRING, loc[2], font=DRAW_FONT)
+
+
+def modify_image(image, lat_func, long_func):
+    skip_count = 0
+    for file in glob.glob("*.kml"):
+        coords = extract_coords_from_kml(file)
+        for coord in coords:
+            split = coord.split(',')
+            x_coord = bound_x_to_image(image.size[0], long_func(float(split[0])))
+            y_coord = lat_func(float(split[1]))
+            if not drawOnExtents and (x_coord is None or y_coord is None):
+                skip_count += 1
+                continue
+            # print("latitude ", split[1], " gave y_coord: ", y_coord)
+            image.putpixel((x_coord, y_coord), (0, 0, 0, 255))
+        if skip_count > 0:
+            print("Skipped ", skip_count, " in ", file)
 
 
 # Maps the X coordinate on the image to an associated longitude
@@ -194,22 +270,11 @@ def do_mod_atl_image():
         # Add time and date the image was generated
         draw.text((700, 115), time_string, (255, 255, 255), font=DRAW_FONT)
         draw.text((700, 130), date_string, (255, 255, 255), font=DRAW_FONT)
-        width, height = image.size
-        for file in glob.glob("*.kml"):
-            print("Handling file: ", file)
-            tree = ET.parse(file)
-            root = tree.getroot()
-            coords = root[0][3][1][0][0][0].text.strip().split()
-            for coord in coords:
-                split = coord.split(',')
-                x_coord = bound_x_to_image(width, get_atl_image_longitude_x_pixel(float(split[0])))
-                y_coord = get_atl_image_latitude_y_pixel(float(split[1]))
-                # print("latitude ", split[1], " gave y_coord: ", y_coord)
-                image.putpixel((x_coord, y_coord), (0, 0, 0, 255))
+        modify_image(image, get_atl_image_latitude_y_pixel, get_atl_image_longitude_x_pixel)
         # testing coordinate generation
         # for longitude in range(0, 45):
         #     longitude = -105 + (longitude * 2.5)
-        #     x_coord = bound_x_to_image(width, get_atl_image_longitude_x_pixel(longitude))
+        #     x_coord = bound_x_to_image(image.size[0], get_atl_image_longitude_x_pixel(longitude))
         #     print("longitude: ", longitude, " x_coord: ", x_coord)
         #     for latitude in range(0, 25):
         #         latitude = latitude * 2.5
@@ -272,28 +337,18 @@ def do_mod_east_pac_image():
     time_string = now_time_loc.strftime("!! %I:%M %p %Z !!")
     date_string = now_time_loc.strftime("!! %a %b %d %Y !!")
     with Image.open('two_pac_5d0.png').convert('RGB') as image:
-        width, height = image.size
         draw = ImageDraw.Draw(image)
         remove_logos_and_add_unofficial_text(draw, east_pac_text_locations)
         # Add time and date the image was generated
         draw.text((15, 130), time_string, (255, 255, 255), font=DRAW_FONT)
         draw.text((15, 145), date_string, (255, 255, 255), font=DRAW_FONT)
-        for file in glob.glob("*.kml"):
-            print("Handling file: ", file)
-            tree = ET.parse(file)
-            root = tree.getroot()
-            coords = root[0][3][1][0][0][0].text.strip().split()
-            for coord in coords:
-                split = coord.split(',')
-                x_coord = bound_x_to_image(width, get_east_pac_image_longitude_x_pixel(float(split[0])))
-                y_coord = get_east_pac_image_latitude_y_pixel(float(split[1]))
-                # print("latitude ", split[1], " gave y_coord: ", y_coord)
-                image.putpixel((x_coord, y_coord), (0, 0, 0, 255))
+        modify_image(image, get_east_pac_image_latitude_y_pixel, get_east_pac_image_longitude_x_pixel)
+
         # testing coordinate generation
         # for longitude in range(0, 45):
         #     longitude = -145 + (longitude * 2.5)
         #
-        #     x_coord = bound_x_to_image(width, get_east_pac_image_longitude_x_pixel(longitude))
+        #     x_coord = bound_x_to_image(image.size[0], get_east_pac_image_longitude_x_pixel(longitude))
         #     print("longitude: ", longitude, " x_coord: ", x_coord)
         #     for latitude in range(0, 20):
         #         latitude = latitude * 2.5
@@ -364,27 +419,17 @@ def do_mod_cpac_image():
     time_string = now_time_loc.strftime("!! %I:%M %p %Z !!")
     date_string = now_time_loc.strftime("!! %a %b %d %Y !!")
     with Image.open('two_cpac_5d0.png').convert('RGB') as image:
-        width, height = image.size
         draw = ImageDraw.Draw(image)
         remove_logos_and_add_unofficial_text(draw, cpac_text_locations)
         # Add time and date the image was generated
         draw.text((700, 165), time_string, (255, 255, 255), font=DRAW_FONT)
         draw.text((700, 180), date_string, (255, 255, 255), font=DRAW_FONT)
-        for file in glob.glob("*.kml"):
-            print("Handling file: ", file)
-            tree = ET.parse(file)
-            root = tree.getroot()
-            coords = root[0][3][1][0][0][0].text.strip().split()
-            for coord in coords:
-                split = coord.split(',')
-                x_coord = bound_x_to_image(width, get_cpac_image_longitude_x_pixel(float(split[0])))
-                y_coord = get_cpac_image_latitude_y_pixel(float(split[1]))
-                # print("latitude ", split[1], " gave y_coord: ", y_coord)
-                image.putpixel((x_coord, y_coord), (0, 0, 0, 255))
+        modify_image(image, get_cpac_image_latitude_y_pixel, get_cpac_image_longitude_x_pixel)
+
         # testing coordinate generation
         # for longitude in range(0, 45):
         #    longitude = -180 + (longitude * 2.5)
-        #    x_coord = bound_x_to_image(width, get_cpac_image_longitude_x_pixel(longitude))
+        #    x_coord = bound_x_to_image(image.size[0], get_cpac_image_longitude_x_pixel(longitude))
         #    print("longitude: ", longitude, " x_coord: ", x_coord)
         #    for latitude in range(0, 20):
         #        latitude = latitude * 2.5
@@ -393,7 +438,7 @@ def do_mod_cpac_image():
         #        image.putpixel((x_coord, y_coord), (0, 0, 0, 255))
         # for longitude in range(0, 4):
         #     longitude = 170 + (longitude * 2.5)
-        #     x_coord = bound_x_to_image(width, get_cpac_image_longitude_x_pixel(longitude))
+        #     x_coord = bound_x_to_image(image.size[0], get_cpac_image_longitude_x_pixel(longitude))
         #     print("longitude: ", longitude, " x_coord: ", x_coord)
         #     for latitude in range(0, 20):
         #        latitude = latitude * 2.5
@@ -420,8 +465,6 @@ def kmz_to_kml(fname):
             out = open(out_name, 'w')
             out.writelines(xmldoc.toxml())
             out.close()
-        else:
-            print("no kml file")
 
 
 def main():
@@ -448,8 +491,11 @@ def main():
         do_mod_east_pac_image()
         # clean up
         if cleanUpFiles:
-            for file in glob.glob("*.km*"):
-                os.remove(file)
+            # The CPAC image overlaps the EPAC
+            if not generateCentralPacific or not drawEPacOnCPac:
+                print("Clean up")
+                for file in glob.glob("*.km*"):
+                    os.remove(file)
             os.remove("two_pac_5d0.png")
 
     if generateCentralPacific:
