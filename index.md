@@ -19,10 +19,12 @@
 
 ##### Disclaimer:
 
-This imagery is not intended for official use, but is provided for entertainment purposes only.  
+This project has no association with the National Hurricane Center nor is any implied; this imagery is not intended for official use, but is provided for entertainment purposes only.  
 
 For official guidance and data, please visit the National Hurricane Center's [website](https://www.nhc.noaa.gov/).
 
 ###### Supporting
 
 If you'd like to send a tip to pay for server time, you can send it via PayPal with my e-mail: *protuhj at gmail.com*
+
+[Project homepage](https://github.com/Protuhj/nhc-cones)
