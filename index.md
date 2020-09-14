@@ -10,6 +10,8 @@
 
 ---
 
+**Note: The cone contains the probable path of the storm center but does not show the size of the storm. Hazardous conditions can occur outside of the cone.**  
+
 [Definition of the NHC Track Forecast Cone](https://www.nhc.noaa.gov/aboutcone.shtml)
 
 
@@ -17,9 +19,9 @@
 
 ##### Disclaimer:
 
-This imagery is not intended for official use, but is provided for entertainment purposes only. There will be bugs, I promise you!
+This imagery is not intended for official use, but is provided for entertainment purposes only.  
 
-For official guidance, please visit the National Hurricane Center's [website](https://www.nhc.noaa.gov/).
+For official guidance and data, please visit the National Hurricane Center's [website](https://www.nhc.noaa.gov/).
 
 ###### Supporting
 
