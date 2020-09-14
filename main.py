@@ -14,7 +14,7 @@ import requests
 import os.path
 from os import path
 from urllib.parse import urlparse
-from PIL import Image, ImageFont, ImageDraw
+from PIL import Image, ImageFont, ImageDraw, ImageColor
 import xml.etree.ElementTree as ET
 from lxml import html
 import datetime
@@ -22,6 +22,9 @@ import pytz
 
 UNOFFICIAL_STRING = '!!UNOFFICIAL IMAGE!!'
 nhcBaseURL = 'https://www.nhc.noaa.gov'
+DRAW_FONT = ImageFont.truetype('Pillow/Tests/fonts/FreeMono.ttf', 15)
+DRAW_WHITE = ImageColor.getrgb('white')
+DRAW_BLACK = ImageColor.getrgb('black')
 addDisclaimerText = True
 cleanUpFiles = True
 generateAtlantic = True
@@ -116,6 +119,15 @@ def get_image_longitude_x_pixel_with_list(longitude_list, decimal_longitude):
             return pair[0]
 
 
+def remove_logos_and_add_unofficial_text(image_draw, text_position_data):
+    # Remove Logos
+    image_draw.rectangle((0, 0, 63, 61), DRAW_WHITE)
+    image_draw.rectangle((838, 0, 898, 61), DRAW_WHITE)
+    if addDisclaimerText:
+        for loc in text_position_data:
+            image_draw.text((loc[0], loc[1]), UNOFFICIAL_STRING, loc[2], font=DRAW_FONT)
+
+
 # Maps the X coordinate on the image to an associated longitude
 atl_longitude_points = []
 atl_longitude_points.append((899, -10))  # Eastern limit
@@ -162,23 +174,26 @@ def get_atl_image_longitude_x_pixel(decimal_longitude):
     return get_image_longitude_x_pixel_with_list(atl_longitude_points, decimal_longitude)
 
 
+atl_text_locations = []
+atl_text_locations.append((20, 40, DRAW_BLACK))
+atl_text_locations.append((700, 40, DRAW_BLACK))
+atl_text_locations.append((15, 525, DRAW_WHITE))
+atl_text_locations.append((700, 100, DRAW_WHITE))
+atl_text_locations.append((700, 540, DRAW_WHITE))
+
+
 def do_mod_atl_image():
     eastern = pytz.timezone('US/Eastern')
     now_time_loc = datetime.datetime.now(eastern)
     time_string = now_time_loc.strftime("!! %I:%M %p %Z !!")
     date_string = now_time_loc.strftime("!! %a %b %d %Y !!")
     with Image.open('two_atl_5d0.png').convert('RGB') as image:
-        if addDisclaimerText:
-            font = ImageFont.truetype('Pillow/Tests/fonts/FreeMono.ttf', 15)
-            draw = ImageDraw.Draw(image)
-            draw.text((700, 100), UNOFFICIAL_STRING, (255, 255, 255), font=font)
-            draw.text((700, 540), UNOFFICIAL_STRING, (255, 255, 255), font=font)
-            draw.text((15, 500), UNOFFICIAL_STRING, (255, 255, 255), font=font)
-            draw.text((80, 40), UNOFFICIAL_STRING, (0, 0, 0), font=font)
-            draw.text((660, 40), UNOFFICIAL_STRING, (0, 0, 0), font=font)
+        draw = ImageDraw.Draw(image)
+        remove_logos_and_add_unofficial_text(draw, atl_text_locations)
+
         # Add time and date the image was generated
-        draw.text((700, 115), time_string, (255, 255, 255), font=font)
-        draw.text((700, 130), date_string, (255, 255, 255), font=font)
+        draw.text((700, 115), time_string, (255, 255, 255), font=DRAW_FONT)
+        draw.text((700, 130), date_string, (255, 255, 255), font=DRAW_FONT)
         width, height = image.size
         for file in glob.glob("*.kml"):
             print("Handling file: ", file)
@@ -243,6 +258,14 @@ def get_east_pac_image_longitude_x_pixel(decimal_longitude):
     return get_image_longitude_x_pixel_with_list(east_pac_longitude_points, decimal_longitude)
 
 
+east_pac_text_locations = []
+east_pac_text_locations.append((20, 40, DRAW_BLACK))
+east_pac_text_locations.append((700, 40, DRAW_BLACK))
+east_pac_text_locations.append((15, 500, DRAW_WHITE))
+east_pac_text_locations.append((15, 100, DRAW_WHITE))
+east_pac_text_locations.append((685, 540, DRAW_WHITE))
+
+
 def do_mod_east_pac_image():
     pacific = pytz.timezone('US/Pacific')
     now_time_loc = datetime.datetime.now(pacific)
@@ -250,17 +273,11 @@ def do_mod_east_pac_image():
     date_string = now_time_loc.strftime("!! %a %b %d %Y !!")
     with Image.open('two_pac_5d0.png').convert('RGB') as image:
         width, height = image.size
-        if addDisclaimerText:
-            font = ImageFont.truetype('Pillow/Tests/fonts/FreeMono.ttf', 15)
-            draw = ImageDraw.Draw(image)
-            draw.text((60, 40), UNOFFICIAL_STRING, (0, 0, 0), font=font)
-            draw.text((15, 500), UNOFFICIAL_STRING, (255, 255, 255), font=font)
-            draw.text((15, 100), UNOFFICIAL_STRING, (255, 255, 255), font=font)
-            draw.text((700, 540), UNOFFICIAL_STRING, (255, 255, 255), font=font)
-            draw.text((660, 40), UNOFFICIAL_STRING, (0, 0, 0), font=font)
+        draw = ImageDraw.Draw(image)
+        remove_logos_and_add_unofficial_text(draw, east_pac_text_locations)
         # Add time and date the image was generated
-        draw.text((15, 130), time_string, (255, 255, 255), font=font)
-        draw.text((15, 145), date_string, (255, 255, 255), font=font)
+        draw.text((15, 130), time_string, (255, 255, 255), font=DRAW_FONT)
+        draw.text((15, 145), date_string, (255, 255, 255), font=DRAW_FONT)
         for file in glob.glob("*.kml"):
             print("Handling file: ", file)
             tree = ET.parse(file)
@@ -309,7 +326,6 @@ cpac_longitude_points_positive.append((125, 180))  # Eastern limit
 cpac_longitude_points_positive.append((60, 175))
 cpac_longitude_points_positive.append((0, 170))  # Western limit
 
-
 # Maps the Y coordinate on the image to an associated latitude
 cpac_latitude_points = []
 cpac_latitude_points.append((587, 0))  # lower limit
@@ -334,6 +350,14 @@ def get_cpac_image_longitude_x_pixel(decimal_longitude):
         return get_image_longitude_x_pixel_with_list(cpac_longitude_points_positive, decimal_longitude)
 
 
+cpac_text_locations = []
+cpac_text_locations.append((20, 40, DRAW_BLACK))
+cpac_text_locations.append((700, 40, DRAW_BLACK))
+cpac_text_locations.append((15, 500, DRAW_WHITE))
+cpac_text_locations.append((700, 150, DRAW_WHITE))
+cpac_text_locations.append((700, 540, DRAW_WHITE))
+
+
 def do_mod_cpac_image():
     hawaii = pytz.timezone('US/Hawaii')
     now_time_loc = datetime.datetime.now(hawaii)
@@ -341,17 +365,11 @@ def do_mod_cpac_image():
     date_string = now_time_loc.strftime("!! %a %b %d %Y !!")
     with Image.open('two_cpac_5d0.png').convert('RGB') as image:
         width, height = image.size
-        if addDisclaimerText:
-            font = ImageFont.truetype('Pillow/Tests/fonts/FreeMono.ttf', 15)
-            draw = ImageDraw.Draw(image)
-            draw.text((60, 40), UNOFFICIAL_STRING, (0, 0, 0), font=font)
-            draw.text((15, 500), UNOFFICIAL_STRING, (255, 255, 255), font=font)
-            draw.text((700, 150), UNOFFICIAL_STRING, (255, 255, 255), font=font)
-            draw.text((700, 540), UNOFFICIAL_STRING, (255, 255, 255), font=font)
-            draw.text((660, 40), UNOFFICIAL_STRING, (0, 0, 0), font=font)
+        draw = ImageDraw.Draw(image)
+        remove_logos_and_add_unofficial_text(draw, cpac_text_locations)
         # Add time and date the image was generated
-        draw.text((700, 165), time_string, (255, 255, 255), font=font)
-        draw.text((700, 180), date_string, (255, 255, 255), font=font)
+        draw.text((700, 165), time_string, (255, 255, 255), font=DRAW_FONT)
+        draw.text((700, 180), date_string, (255, 255, 255), font=DRAW_FONT)
         for file in glob.glob("*.kml"):
             print("Handling file: ", file)
             tree = ET.parse(file)

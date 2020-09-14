@@ -1,6 +1,6 @@
 # NHC Cones
 ##### Author: Protuhj
-##### Version: 0.9.2
+##### Version: 0.9.3
 
 #### Disclaimer:  
 I am in no way associated with the National Hurricane Center, and this project or its output is not intended for official use.  
