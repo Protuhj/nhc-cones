@@ -1,3 +1,5 @@
+![Image Updater](https://github.com/Protuhj/nhc-cones/workflows/Image_Updater/badge.svg)
+
 ### Atlantic Basin
 ![Atlantic Basin Image](atl_latest.png)
 
