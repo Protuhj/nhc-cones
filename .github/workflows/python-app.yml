@@ -5,7 +5,7 @@ name: Image_Updater
 
 on:
   schedule: 
-    - cron: 3,31 * * * *
+    - cron: '3,31 * * * *'
   workflow_dispatch:
 
 jobs:
