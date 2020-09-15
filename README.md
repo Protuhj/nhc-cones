@@ -1,3 +1,6 @@
+![Image Updater](https://github.com/Protuhj/nhc-cones/workflows/Image_Updater/badge.svg)
+
+
 # NHC Cones
 ##### Author: Protuhj
 ##### Version: 0.9.4
