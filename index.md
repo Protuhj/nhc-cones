@@ -1,11 +1,21 @@
 ### Atlantic Basin
-![Atlantic Basin Image](atl_latest.png)
+![Atlantic Basin Image](atl_latest.png)  
+
+**[NHC Atlantic Forecast Page](https://www.nhc.noaa.gov/?atlc)**
+
+---
 
 ### Eastern Pacific
-![Eastern Pacific Image](epac_latest.png)
+![Eastern Pacific Image](epac_latest.png)  
+
+**[NHC Eastern Pacific Forecast Page](https://www.nhc.noaa.gov/?epac)**
+
+---
 
 ### Central Pacific
-![Central Pacific Image](cpac_latest.png)
+![Central Pacific Image](cpac_latest.png)  
+
+**[NHC Central Pacific Forecast Page](https://www.nhc.noaa.gov/?cpac)**
 
 
 ---
