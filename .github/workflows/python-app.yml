@@ -5,7 +5,7 @@ name: Image_Updater
 
 on:
   schedule: 
-    - cron: '22 * * * *'
+    - cron: '55 * * * *'
 
 jobs:
   build:
