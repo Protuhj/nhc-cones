@@ -31,7 +31,7 @@ jobs:
         source env/bin/activate
         python main.py
     - name: Set current date as env variable
-      run: echo "name=NOW::$(date)" >> $GITHUB_ENV
+      run: echo "NOW=$(date)" >> $GITHUB_ENV
     - uses: stefanzweifel/git-auto-commit-action@v4
       with:
         # Required
