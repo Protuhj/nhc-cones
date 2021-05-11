@@ -5,7 +5,10 @@ name: Image_Updater
 
 on:
   schedule: 
-    - cron: '55 * * * *'
+    # When the season picks up, run every hour at 55 past
+    #- cron: '55 * * * *'
+    # Early on in the season, run every 6 hours
+    - cron: '55 */6 * * *'
   workflow_dispatch:
 
 jobs:
