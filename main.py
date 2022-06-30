@@ -22,7 +22,11 @@ import pytz
 
 UNOFFICIAL_STRING = '!!UNOFFICIAL IMAGE!!'
 NHC_BASE_URL = 'https://www.nhc.noaa.gov'
-DRAW_FONT = ImageFont.truetype('Pillow/Tests/fonts/FreeMono.ttf', 15)
+try:
+    DRAW_FONT = ImageFont.truetype('Pillow/Tests/fonts/FreeMono.ttf', 15)
+except:
+    print("Failed to load FreeMono.ttf, trying load_default()")
+    DRAW_FONT = ImageFont.load_default()
 DRAW_WHITE = ImageColor.getrgb('white')
 DRAW_BLACK = ImageColor.getrgb('black')
 addDisclaimerText = True
@@ -30,7 +34,8 @@ cleanUpFiles = True
 generateAtlantic = True
 generateCentralPacific = True
 generateEasternPacific = True
-drawEPacOnCPac = True
+# Controls whether or not the cones are drawn on each map, if there's overlap
+drawConesWhenTheyOverlapRegions = True
 # Controls whether or not pixels are drawn that are outside of the viewport
 # When drawing EPac on CPac, this will happen a lot
 drawOnExtents = False
@@ -68,7 +73,8 @@ def extract_coords_from_kml(file):
 # Atlantic which_td = 2
 # Eastern Pacific which_td = 3
 # Central Pacific which_td = 4
-def scrape_page(which_td):
+# convert_kmz_to_kml controls if we want to call kmz_to_kml in this function, or delay it, in the case we're going to overlap cones on all maps
+def scrape_page(which_td, convert_kmz_to_kml=True):
     page = requests.get('https://www.nhc.noaa.gov/gis/')
     content = page.content.decode('UTF-8')
     tree = html.fromstring(content)
@@ -86,7 +92,8 @@ def scrape_page(which_td):
             urllib.request.urlretrieve(full_url, file_name)
         else:
             print("file ", file_name, " already downloaded")
-        kmz_to_kml(file_name)
+        if convert_kmz_to_kml:
+            kmz_to_kml(file_name)
 
 
 def get_latest_base_image(image_url):
@@ -473,41 +480,83 @@ def main():
     # Eastern Pacific which_td = 3
     # Central Pacific which_td = 4
 
-    if generateAtlantic:
-        # Atlantic
-        scrape_page(2)
-        get_latest_base_image('https://www.nhc.noaa.gov/xgtwo/two_atl_5d0.png')
-        do_mod_atl_image()
-        # clean up
-        if cleanUpFiles:
-            for file in glob.glob("*.km*"):
-                os.remove(file)
-            os.remove("two_atl_5d0.png")
-
-    if generateEasternPacific:
-        # Eastern Pacific
-        scrape_page(3)
-        get_latest_base_image('https://www.nhc.noaa.gov/xgtwo/two_pac_5d0.png')
-        do_mod_east_pac_image()
-        # clean up
-        if cleanUpFiles:
-            # The CPAC image overlaps the EPAC
-            if not generateCentralPacific or not drawEPacOnCPac:
-                print("Clean up")
+    if not drawConesWhenTheyOverlapRegions:
+        if generateAtlantic:
+            # Atlantic
+            scrape_page(2)
+            get_latest_base_image('https://www.nhc.noaa.gov/xgtwo/two_atl_5d0.png')
+            do_mod_atl_image()
+            # clean up
+            if cleanUpFiles:
                 for file in glob.glob("*.km*"):
                     os.remove(file)
-            os.remove("two_pac_5d0.png")
+                os.remove("two_atl_5d0.png")
 
-    if generateCentralPacific:
-        # Central Pacific
-        scrape_page(4)
-        get_latest_base_image('https://www.nhc.noaa.gov/xgtwo/two_cpac_5d0.png')
-        do_mod_cpac_image()
-        # clean up
+        if generateEasternPacific:
+            # Eastern Pacific
+            scrape_page(3)
+            get_latest_base_image('https://www.nhc.noaa.gov/xgtwo/two_pac_5d0.png')
+            do_mod_east_pac_image()
+            # clean up
+            if cleanUpFiles:
+                for file in glob.glob("*.km*"):
+                    os.remove(file)
+                os.remove("two_pac_5d0.png")
+
+        if generateCentralPacific:
+            # Central Pacific
+            scrape_page(4)
+            get_latest_base_image('https://www.nhc.noaa.gov/xgtwo/two_cpac_5d0.png')
+            do_mod_cpac_image()
+            # clean up
+            if cleanUpFiles:
+                for file in glob.glob("*.km*"):
+                    os.remove(file)
+                os.remove("two_cpac_5d0.png")
+    else:
+        if generateAtlantic:
+            # Atlantic
+            scrape_page(2, False)
+            get_latest_base_image('https://www.nhc.noaa.gov/xgtwo/two_atl_5d0.png')
+
+        if generateEasternPacific:
+            # Eastern Pacific
+            scrape_page(3, False)
+            get_latest_base_image('https://www.nhc.noaa.gov/xgtwo/two_pac_5d0.png')
+
+        if generateCentralPacific:
+            # Central Pacific
+            scrape_page(4, False)
+            get_latest_base_image('https://www.nhc.noaa.gov/xgtwo/two_cpac_5d0.png')
+
+
+        # Now convert kmz to kml
+        for file in glob.glob("*.kmz"):
+            kmz_to_kml(file)
+
+        if generateAtlantic:
+            do_mod_atl_image()
+        if generateEasternPacific:
+            do_mod_east_pac_image()
+        if generateCentralPacific:
+            do_mod_cpac_image()
+
+        # Clean up
         if cleanUpFiles:
             for file in glob.glob("*.km*"):
                 os.remove(file)
-            os.remove("two_cpac_5d0.png")
+            try:
+                os.remove("two_atl_5d0.png")
+            except:
+                pass
+            try:
+                os.remove("two_pac_5d0.png")
+            except:
+                pass
+            try:
+                os.remove("two_cpac_5d0.png")
+            except:
+                pass
 
 
 if __name__ == "__main__":
