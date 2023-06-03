@@ -270,7 +270,7 @@ def do_mod_atl_image():
     now_time_loc = datetime.datetime.now(eastern)
     time_string = now_time_loc.strftime("!! %I:%M %p %Z !!")
     date_string = now_time_loc.strftime("!! %a %b %d %Y !!")
-    with Image.open('two_atl_5d0.png').convert('RGB') as image:
+    with Image.open('two_atl_7d0.png').convert('RGB') as image:
         draw = ImageDraw.Draw(image)
         remove_logos_and_add_unofficial_text(draw, atl_text_locations)
 
@@ -343,7 +343,7 @@ def do_mod_east_pac_image():
     now_time_loc = datetime.datetime.now(pacific)
     time_string = now_time_loc.strftime("!! %I:%M %p %Z !!")
     date_string = now_time_loc.strftime("!! %a %b %d %Y !!")
-    with Image.open('two_pac_5d0.png').convert('RGB') as image:
+    with Image.open('two_pac_7d0.png').convert('RGB') as image:
         draw = ImageDraw.Draw(image)
         remove_logos_and_add_unofficial_text(draw, east_pac_text_locations)
         # Add time and date the image was generated
@@ -425,7 +425,7 @@ def do_mod_cpac_image():
     now_time_loc = datetime.datetime.now(hawaii)
     time_string = now_time_loc.strftime("!! %I:%M %p %Z !!")
     date_string = now_time_loc.strftime("!! %a %b %d %Y !!")
-    with Image.open('two_cpac_5d0.png').convert('RGB') as image:
+    with Image.open('two_cpac_7d0.png').convert('RGB') as image:
         draw = ImageDraw.Draw(image)
         remove_logos_and_add_unofficial_text(draw, cpac_text_locations)
         # Add time and date the image was generated
@@ -484,50 +484,50 @@ def main():
         if generateAtlantic:
             # Atlantic
             scrape_page(2)
-            get_latest_base_image('https://www.nhc.noaa.gov/xgtwo/two_atl_5d0.png')
+            get_latest_base_image('https://www.nhc.noaa.gov/xgtwo/two_atl_7d0.png')
             do_mod_atl_image()
             # clean up
             if cleanUpFiles:
                 for file in glob.glob("*.km*"):
                     os.remove(file)
-                os.remove("two_atl_5d0.png")
+                os.remove("two_atl_7d0.png")
 
         if generateEasternPacific:
             # Eastern Pacific
             scrape_page(3)
-            get_latest_base_image('https://www.nhc.noaa.gov/xgtwo/two_pac_5d0.png')
+            get_latest_base_image('https://www.nhc.noaa.gov/xgtwo/two_pac_7d0.png')
             do_mod_east_pac_image()
             # clean up
             if cleanUpFiles:
                 for file in glob.glob("*.km*"):
                     os.remove(file)
-                os.remove("two_pac_5d0.png")
+                os.remove("two_pac_7d0.png")
 
         if generateCentralPacific:
             # Central Pacific
             scrape_page(4)
-            get_latest_base_image('https://www.nhc.noaa.gov/xgtwo/two_cpac_5d0.png')
+            get_latest_base_image('https://www.nhc.noaa.gov/xgtwo/two_cpac_7d0.png')
             do_mod_cpac_image()
             # clean up
             if cleanUpFiles:
                 for file in glob.glob("*.km*"):
                     os.remove(file)
-                os.remove("two_cpac_5d0.png")
+                os.remove("two_cpac_7d0.png")
     else:
         if generateAtlantic:
             # Atlantic
             scrape_page(2, False)
-            get_latest_base_image('https://www.nhc.noaa.gov/xgtwo/two_atl_5d0.png')
+            get_latest_base_image('https://www.nhc.noaa.gov/xgtwo/two_atl_7d0.png')
 
         if generateEasternPacific:
             # Eastern Pacific
             scrape_page(3, False)
-            get_latest_base_image('https://www.nhc.noaa.gov/xgtwo/two_pac_5d0.png')
+            get_latest_base_image('https://www.nhc.noaa.gov/xgtwo/two_pac_7d0.png')
 
         if generateCentralPacific:
             # Central Pacific
             scrape_page(4, False)
-            get_latest_base_image('https://www.nhc.noaa.gov/xgtwo/two_cpac_5d0.png')
+            get_latest_base_image('https://www.nhc.noaa.gov/xgtwo/two_cpac_7d0.png')
 
 
         # Now convert kmz to kml
@@ -546,15 +546,15 @@ def main():
             for file in glob.glob("*.km*"):
                 os.remove(file)
             try:
-                os.remove("two_atl_5d0.png")
+                os.remove("two_atl_7d0.png")
             except:
                 pass
             try:
-                os.remove("two_pac_5d0.png")
+                os.remove("two_pac_7d0.png")
             except:
                 pass
             try:
-                os.remove("two_cpac_5d0.png")
+                os.remove("two_cpac_7d0.png")
             except:
                 pass
 
