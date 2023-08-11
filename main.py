@@ -382,9 +382,14 @@ cpac_longitude_points_negative.append((255, -170))
 cpac_longitude_points_negative.append((190, -175))
 cpac_longitude_points_negative.append((125, -180))  # Western limit
 
-# From +170 to +180
+# From +170 to +205
 cpac_longitude_points_positive = []
-cpac_longitude_points_positive.append((125, 180))  # Eastern limit
+cpac_longitude_points_positive.append((450, 205))  # Eastern limit
+cpac_longitude_points_positive.append((385, 200))
+cpac_longitude_points_positive.append((320, 195))
+cpac_longitude_points_positive.append((255, 190))
+cpac_longitude_points_positive.append((190, 185))
+cpac_longitude_points_positive.append((125, 180))
 cpac_longitude_points_positive.append((60, 175))
 cpac_longitude_points_positive.append((0, 170))  # Western limit
 
