@@ -12,7 +12,7 @@ I am in no way associated with the National Hurricane Center, and this project o
 ---
 
 #### Description:
-Takes the current storm data from the National Hurricane Center (NHC) and plots all the forecast cones onto the 7 day forecast graphics
+Takes the current storm data from the National Hurricane Center (NHC) and plots all the 5 day forecast cones onto the 7 day forecast graphics
 
 
 
