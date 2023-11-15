@@ -8,9 +8,9 @@ on:
     # When the season picks up, run every hour at 55 past
     #- cron: '55 * * * *'
     # When the season slows, run every hour 3 hours
-    #- cron: '55 */3 * * *'
+    - cron: '55 */3 * * *'
     # Early or later on in the season, run every 12 hours
-    - cron: '55 */12 * * *'
+    #- cron: '55 */12 * * *'
   workflow_dispatch:
 
 jobs:
