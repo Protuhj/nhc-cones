@@ -1,3 +1,5 @@
+# Note: The 2023 Hurricane season ended on November 30th, this page will not be updating until the 2024 Hurricane season begins on June 1<sup>st</sup>, 2024
+
 ### Atlantic Basin
 ![Atlantic Basin Image](atl_latest.png)  
 
