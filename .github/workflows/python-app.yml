@@ -12,7 +12,7 @@ on:
     # When there's nothing, run every 6 hours
     - cron: '55 */6 * * *'
     # Early or later on in the season, run every 12 hours
-    - cron: '55 */12 * * *'
+    #- cron: '55 */12 * * *'
   workflow_dispatch:
 
 jobs:
