@@ -309,6 +309,38 @@ east_pac_longitude_points.append((128, -135))
 east_pac_longitude_points.append((64, -140))
 east_pac_longitude_points.append((0, -145))  # Western limit
 
+# These coordinates changed in 2025
+east_pac_longitude_points_2025 = []
+east_pac_longitude_points_2025.append((899, -76))  # Eastern limit
+east_pac_longitude_points_2025.append((875, -80))
+east_pac_longitude_points_2025.append((833, -85))
+east_pac_longitude_points_2025.append((792, -90))
+east_pac_longitude_points_2025.append((750, -95))
+east_pac_longitude_points_2025.append((708, -100))
+east_pac_longitude_points_2025.append((667, -105))
+east_pac_longitude_points_2025.append((625, -110))
+east_pac_longitude_points_2025.append((583, -115))
+east_pac_longitude_points_2025.append((542, -120))
+east_pac_longitude_points_2025.append((500, -125))
+east_pac_longitude_points_2025.append((458, -130))
+east_pac_longitude_points_2025.append((417, -135))
+east_pac_longitude_points_2025.append((375, -140))
+east_pac_longitude_points_2025.append((333, -145))
+east_pac_longitude_points_2025.append((292, -150))
+east_pac_longitude_points_2025.append((250, -155))
+east_pac_longitude_points_2025.append((208, -160))
+east_pac_longitude_points_2025.append((167, -165))
+east_pac_longitude_points_2025.append((125, -170))
+east_pac_longitude_points_2025.append((83, -175))
+east_pac_longitude_points_2025.append((42, -180))
+east_pac_longitude_points_2025.append((0, -184)) # Western limit
+
+east_pac_longitude_points_2025_positive = []
+east_pac_longitude_points_2025_positive.append((125, 190))
+east_pac_longitude_points_2025_positive.append((83, 185))
+east_pac_longitude_points_2025_positive.append((42, 180))
+east_pac_longitude_points_2025_positive.append((0, 176)) # Western limit
+
 # Maps the Y coordinate on the image to an associated latitude
 east_pac_latitude_points = []
 east_pac_latitude_points.append((595, 0))  # lower limit
@@ -321,21 +353,43 @@ east_pac_latitude_points.append((194, 30))
 east_pac_latitude_points.append((118, 35))
 east_pac_latitude_points.append((64, 40))  # upper limit
 
+# These coordinates changed in 2025
+east_pac_latitude_points_2025 = []
+east_pac_latitude_points_2025.append((421, 0))  # lower limit
+east_pac_latitude_points_2025.append((377, 5))
+east_pac_latitude_points_2025.append((334, 10))
+east_pac_latitude_points_2025.append((289, 15))
+east_pac_latitude_points_2025.append((244, 20))
+east_pac_latitude_points_2025.append((197, 25))
+east_pac_latitude_points_2025.append((148, 30))
+east_pac_latitude_points_2025.append((96, 35))
+east_pac_latitude_points_2025.append((64, 38))  # upper limit
+
 
 def get_east_pac_image_latitude_y_pixel(decimal_latitude):
     return get_image_latitude_y_pixel_with_list(east_pac_latitude_points, decimal_latitude)
 
-
 def get_east_pac_image_longitude_x_pixel(decimal_longitude):
     return get_image_longitude_x_pixel_with_list(east_pac_longitude_points, decimal_longitude)
+
+# The epac image dimensions changed in 2025
+def get_east_pac_image_latitude_y_pixel_2025(decimal_latitude):
+    return get_image_latitude_y_pixel_with_list(east_pac_latitude_points_2025, decimal_latitude)
+
+def get_east_pac_image_longitude_x_pixel_2025(decimal_longitude):
+    if decimal_longitude < 0:
+        return get_image_longitude_x_pixel_with_list(east_pac_longitude_points_2025, decimal_longitude)
+    else:
+        return get_image_longitude_x_pixel_with_list(east_pac_longitude_points_2025_positive, decimal_longitude)
+
 
 
 east_pac_text_locations = []
 east_pac_text_locations.append((20, 40, DRAW_BLACK))
 east_pac_text_locations.append((700, 40, DRAW_BLACK))
-east_pac_text_locations.append((15, 500, DRAW_WHITE))
-east_pac_text_locations.append((15, 100, DRAW_WHITE))
-east_pac_text_locations.append((685, 540, DRAW_WHITE))
+east_pac_text_locations.append((35, 500, DRAW_WHITE))
+east_pac_text_locations.append((35, 100, DRAW_WHITE))
+east_pac_text_locations.append((720, 410, DRAW_WHITE))
 
 
 def do_mod_east_pac_image():
@@ -347,9 +401,9 @@ def do_mod_east_pac_image():
         draw = ImageDraw.Draw(image)
         remove_logos_and_add_unofficial_text(draw, east_pac_text_locations)
         # Add time and date the image was generated
-        draw.text((15, 130), time_string, (255, 255, 255), font=DRAW_FONT)
-        draw.text((15, 145), date_string, (255, 255, 255), font=DRAW_FONT)
-        modify_image(image, get_east_pac_image_latitude_y_pixel, get_east_pac_image_longitude_x_pixel)
+        draw.text((35, 130), time_string, (255, 255, 255), font=DRAW_FONT)
+        draw.text((35, 145), date_string, (255, 255, 255), font=DRAW_FONT)
+        modify_image(image, get_east_pac_image_latitude_y_pixel_2025, get_east_pac_image_longitude_x_pixel_2025)
 
         # testing coordinate generation
         # for longitude in range(0, 45):
