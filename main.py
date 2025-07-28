@@ -333,13 +333,21 @@ east_pac_longitude_points_2025.append((167, -165))
 east_pac_longitude_points_2025.append((125, -170))
 east_pac_longitude_points_2025.append((83, -175))
 east_pac_longitude_points_2025.append((42, -180))
-east_pac_longitude_points_2025.append((0, -184)) # Western limit
+east_pac_longitude_points_2025.append((0, -185)) # Western limit
 
 east_pac_longitude_points_2025_positive = []
+east_pac_longitude_points_2025_positive.append((458, 230))
+east_pac_longitude_points_2025_positive.append((417, 225))
+east_pac_longitude_points_2025_positive.append((375, 220))
+east_pac_longitude_points_2025_positive.append((333, 215))
+east_pac_longitude_points_2025_positive.append((292, 210))
+east_pac_longitude_points_2025_positive.append((250, 205))
+east_pac_longitude_points_2025_positive.append((208, 200))
+east_pac_longitude_points_2025_positive.append((167, 195))
 east_pac_longitude_points_2025_positive.append((125, 190))
 east_pac_longitude_points_2025_positive.append((83, 185))
 east_pac_longitude_points_2025_positive.append((42, 180))
-east_pac_longitude_points_2025_positive.append((0, 176)) # Western limit
+east_pac_longitude_points_2025_positive.append((0, 175)) # Western limit
 
 # Maps the Y coordinate on the image to an associated latitude
 east_pac_latitude_points = []
@@ -438,7 +446,14 @@ cpac_longitude_points_negative.append((125, -180))  # Western limit
 
 # From +170 to +205
 cpac_longitude_points_positive = []
-cpac_longitude_points_positive.append((450, 205))  # Eastern limit
+cpac_longitude_points_positive.append((899, 240))   # Eastern limit (Updated July 2025)
+cpac_longitude_points_positive.append((839, 235))
+cpac_longitude_points_positive.append((774, 230))
+cpac_longitude_points_positive.append((709, 225))
+cpac_longitude_points_positive.append((644, 220))
+cpac_longitude_points_positive.append((579, 215))
+cpac_longitude_points_positive.append((514, 210))
+cpac_longitude_points_positive.append((449, 205))
 cpac_longitude_points_positive.append((385, 200))
 cpac_longitude_points_positive.append((320, 195))
 cpac_longitude_points_positive.append((255, 190))
@@ -448,14 +463,15 @@ cpac_longitude_points_positive.append((60, 175))
 cpac_longitude_points_positive.append((0, 170))  # Western limit
 
 # Maps the Y coordinate on the image to an associated latitude
+# Updated July 2025 for accuracy
 cpac_latitude_points = []
 cpac_latitude_points.append((587, 0))  # lower limit
-cpac_latitude_points.append((526, 5))
-cpac_latitude_points.append((462, 10))
-cpac_latitude_points.append((398, 15))
-cpac_latitude_points.append((332, 20))
-cpac_latitude_points.append((263, 25))
-cpac_latitude_points.append((192, 30))
+cpac_latitude_points.append((534, 5))
+cpac_latitude_points.append((469, 10))
+cpac_latitude_points.append((403, 15))
+cpac_latitude_points.append((336, 20))
+cpac_latitude_points.append((266, 25))
+cpac_latitude_points.append((193, 30))
 cpac_latitude_points.append((117, 35))
 cpac_latitude_points.append((64, 40))  # upper limit
 
