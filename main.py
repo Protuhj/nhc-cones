@@ -371,7 +371,7 @@ east_pac_latitude_points_2025.append((244, 20))
 east_pac_latitude_points_2025.append((197, 25))
 east_pac_latitude_points_2025.append((148, 30))
 east_pac_latitude_points_2025.append((96, 35))
-east_pac_latitude_points_2025.append((64, 38))  # upper limit
+east_pac_latitude_points_2025.append((64, 40))  # upper limit
 
 
 def get_east_pac_image_latitude_y_pixel(decimal_latitude):
