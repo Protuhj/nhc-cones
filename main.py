@@ -48,13 +48,13 @@ def get_namespace(element):
 
 
 def extract_coords_from_kml(file):
-    print("Reading file: ", file)
+    print(f"extract_coords_from_kml: Reading file: {file}")
     tree = ET.parse(file)
     root = tree.getroot()
     namespace = get_namespace(root)
-    # print("namespace is: ", namespace)
+    # print(f"namespace is: {namespace}")
     coords = []
-    for node in root.findall(".//{0}LinearRing/{0}coordinates".format(namespace)):
+    for node in root.findall(f".//{namespace}LinearRing/{namespace}coordinates"):
         coord_text_split = node.text.strip().split()
         for coord_text in coord_text_split:
             coords.append(coord_text)
@@ -65,9 +65,68 @@ def extract_coords_from_kml(file):
     #         coords.append(coord_text)
     if not coords:
         # Fall back to brute-force
-        print("WARNING: Failed to get coords from ", file)
+        print(f"WARNING: Failed to get coords from {file}")
         coords = root[0][3][1][0][0][0].text.strip().split()
     return coords
+
+def extract_speed_from_kml(file):
+    print(f"extract_speed_from_kml: Reading file: {file}")
+    tree = ET.parse(file)
+    root = tree.getroot()
+    namespace = get_namespace(root)
+    # print(f"namespace is: {namespace}")
+    got_coords = False
+    got_speed = False
+    lat_val = 0
+    lon_val = 0
+    max_wind = 0
+    for node in root.findall(f".//{namespace}ExtendedData/{namespace}Data"):
+
+        if node.get("name") == "TCInitLocation":
+            value = node.find(f"./{namespace}value")
+            if value is not None:
+
+                coord_text_split = value.text.strip().replace(",", "").split()
+                if len(coord_text_split) == 2:
+                    lat_val, lon_val = coord_text_split
+                    try:
+                        # First try to convert the value directly to a float
+                        lat_val = float(lat_val)
+                    except:
+                        # If an exception, then it's a string representation
+                        if lat_val.endswith("S"):
+                            lat_val = f"-{lat_val}"
+                        # Remove the last character (it's a N or S)
+                        lat_val = lat_val[:-1]
+                    try:
+                        # First try to convert the value directly to a float
+                        lon_val = float(lon_val)
+                    except:
+                        # If an exception, then it's a string representation
+                        if lon_val.endswith("W"):
+                            lon_val = f"-{lon_val}"
+                        # Remove the last character (it's a W or E)
+                        lon_val = lon_val[:-1]
+                    got_coords = True
+                    if got_speed:
+                        break
+            else:
+                print("No TCInitLocation value")
+                break
+        if node.get("name") == "maxWindMPH":
+            value = node.find(f"./{namespace}value")
+            if value is not None:
+                max_wind = value.text.strip()
+                got_speed = True
+                if got_coords:
+                    break
+            else:
+                print("No maxWindMPH value")
+                break
+    if not got_coords and not got_speed:
+        print("WARNING: Failed to get coords from ", file)
+        return None, None, None
+    return lat_val, lon_val, max_wind
 
 
 # Atlantic which_td = 2
@@ -82,6 +141,8 @@ def scrape_page(which_td, convert_kmz_to_kml=True):
     links = tree.xpath("/html/body/div[5]/div/table[1]/tr[3]/td[{}]/a".format(which_td))
     for link in links:
         if re.match(r'.*/\w+_CONE_latest.kmz', link.attrib['href']):
+            kmz_files.append(link.attrib['href'])
+        elif re.match(r'.*/\w+_TRACK_latest.kmz', link.attrib['href']):
             kmz_files.append(link.attrib['href'])
     for file_match in kmz_files:
         full_url = "{}{}".format(NHC_BASE_URL, file_match.strip())
@@ -196,7 +257,7 @@ def remove_logos_and_add_unofficial_text(image_draw, text_position_data):
 
 def modify_image(image, lat_func, long_func):
     skip_count = 0
-    for file in glob.glob("*.kml"):
+    for file in glob.glob("*CONE*.kml"):
         coords = extract_coords_from_kml(file)
         for coord in coords:
             split = coord.split(',')
@@ -209,6 +270,24 @@ def modify_image(image, lat_func, long_func):
             image.putpixel((x_coord, y_coord), (0, 0, 0, 255))
         if skip_count > 0:
             print("Skipped ", skip_count, " in ", file)
+
+    # Now try to draw the windspeed on the image
+    image_draw = None
+    for file in glob.glob("*TRACK*.kml"):
+        lat_val, lon_val, max_wind = extract_speed_from_kml(file)
+        if lat_val is not None:
+            if image_draw is None:
+                image_draw = ImageDraw.Draw(image)
+            x_coord = bound_x_to_image(image.size[0], long_func(float(lon_val)))
+
+            y_coord = lat_func(float(lat_val))
+            # print(f"{lon_val}, {lat_val} - {max_wind}")
+            if x_coord is not None and y_coord is not None:
+                # Adjust eastward a tiny bit
+                x_coord += 11
+                # Adjust northward a tiny bit
+                y_coord -= 5
+                image_draw.text((x_coord, y_coord), f"{max_wind}mph", DRAW_WHITE, font=DRAW_FONT)
 
 
 # Maps the X coordinate on the image to an associated longitude
