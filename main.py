@@ -287,7 +287,7 @@ def modify_image(image, lat_func, long_func):
                 x_coord += 11
                 # Adjust northward a tiny bit
                 y_coord -= 5
-                image_draw.text((x_coord, y_coord), f"{max_wind}mph", DRAW_WHITE, font=DRAW_FONT)
+                image_draw.text((x_coord, y_coord), f"{max_wind}mph", DRAW_BLACK, font=DRAW_FONT)
 
 
 # Maps the X coordinate on the image to an associated longitude
